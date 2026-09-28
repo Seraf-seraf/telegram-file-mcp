@@ -26,7 +26,7 @@ MCP endpoint: `http://localhost:8080/api/mcp` (`PORT` меняет порт ло
 
 ## Vercel
 
-Импортируйте репозиторий в Vercel, добавьте `TELEGRAM_BOT_TOKEN` и `TELEGRAM_CHAT_ID` (при необходимости `MAX_FILE_BYTES`), затем выполните deploy. MCP endpoint будет доступен по `/api/mcp`. Подключите его через [MCP Inspector](https://github.com/modelcontextprotocol/inspector), проверьте `tools/list` и вызов инструмента. Vercel может обращаться к Telegram Bot API напрямую; Telegram proxy/VPN сервису не нужен.
+Импортируйте репозиторий в Vercel, добавьте `TELEGRAM_BOT_TOKEN` и `TELEGRAM_CHAT_ID` (при необходимости `MAX_FILE_BYTES`), затем выполните deploy. Vercel запускает Go backend из `cmd/server/main.go`; MCP endpoint будет доступен по `/api/mcp`. Подключите его через [MCP Inspector](https://github.com/modelcontextprotocol/inspector), проверьте `tools/list` и вызов инструмента. Vercel может обращаться к Telegram Bot API напрямую; Telegram proxy/VPN сервису не нужен.
 
 ## Ограничения MVP
 

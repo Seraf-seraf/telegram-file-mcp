@@ -1,10 +1,10 @@
 .PHONY: fmt fmt-check vet test test-race build
 
 fmt:
-	gofmt -w ./api ./cmd ./internal
+	gofmt -w ./cmd ./internal
 
 fmt-check:
-	test -z "$(gofmt -l ./api ./cmd ./internal)"
+	test -z "$(gofmt -l ./cmd ./internal)"
 
 vet:
 	go vet ./...
