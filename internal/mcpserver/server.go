@@ -39,7 +39,7 @@ type arguments struct {
 	Caption schemaString `json:"caption,omitempty"`
 }
 
-func NewHandler(service Sender) http.Handler {
+func NewHandler(service Sender, disableLocalhostProtection bool) http.Handler {
 	server := mcp.NewServer(&mcp.Implementation{Name: "telegram-file-mcp", Version: "0.1.0"}, nil)
 	falseValue := false
 	trueValue := true
@@ -68,7 +68,7 @@ func NewHandler(service Sender) http.Handler {
 		}
 		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: string(encoded)}}, StructuredContent: result}, nil
 	})
-	return mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return server }, &mcp.StreamableHTTPOptions{Stateless: true, JSONResponse: true, MaxRequestBodyBytes: 1 << 20})
+	return mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return server }, &mcp.StreamableHTTPOptions{Stateless: true, JSONResponse: true, MaxRequestBodyBytes: 1 << 20, DisableLocalhostProtection: disableLocalhostProtection})
 }
 func toolError(category sendfile.ErrorCategory) *mcp.CallToolResult {
 	return &mcp.CallToolResult{IsError: true, Content: []mcp.Content{&mcp.TextContent{Text: string(category)}}}

@@ -17,7 +17,15 @@ const (
 )
 
 func New(cfg config.Config) http.Handler {
+	return newHandler(cfg, false)
+}
+
+func NewForVercel(cfg config.Config) http.Handler {
+	return newHandler(cfg, true)
+}
+
+func newHandler(cfg config.Config, disableLocalhostProtection bool) http.Handler {
 	fetcher := filefetch.NewClient(&http.Client{Timeout: fileDownloadTimeout}, cfg.MaxFileBytes)
 	sender := telegram.NewClient(cfg.TelegramBotToken, cfg.TelegramChatID, &http.Client{Timeout: telegramRequestTimeout}, "")
-	return mcpserver.NewHandler(sendfile.NewService(fetcher, sender))
+	return mcpserver.NewHandler(sendfile.NewService(fetcher, sender), disableLocalhostProtection)
 }

@@ -19,7 +19,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		var cfg config.Config
 		cfg, configErr = config.LoadFromEnv()
 		if configErr == nil {
-			mcpHandler = app.New(cfg)
+			mcpHandler = app.NewForVercel(cfg)
 		}
 	})
 	if configErr != nil {

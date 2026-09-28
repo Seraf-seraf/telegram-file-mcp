@@ -24,7 +24,7 @@ func (f *fakeSender) Send(_ context.Context, r sendfile.Request) (sendfile.Resul
 }
 func TestMCPTool(t *testing.T) {
 	f := &fakeSender{}
-	httpServer := httptest.NewServer(NewHandler(f))
+	httpServer := httptest.NewServer(NewHandler(f, false))
 	defer httpServer.Close()
 	client := mcp.NewClient(&mcp.Implementation{Name: "test", Version: "1"}, nil)
 	session, err := client.Connect(context.Background(), &mcp.StreamableClientTransport{Endpoint: httpServer.URL}, nil)
@@ -78,5 +78,39 @@ func TestMCPTool(t *testing.T) {
 	response.Body.Close()
 	if response.StatusCode < 400 {
 		t.Fatalf("oversized request status=%d", response.StatusCode)
+	}
+}
+
+func TestLocalhostProtectionCanBeDisabledForVercelProxy(t *testing.T) {
+	for _, test := range []struct {
+		name                       string
+		disableLocalhostProtection bool
+		wantStatus                 int
+	}{
+		{name: "local server rejects forwarded public host", wantStatus: http.StatusForbidden},
+		{name: "vercel handler accepts forwarded public host", disableLocalhostProtection: true, wantStatus: http.StatusOK},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			server := httptest.NewServer(NewHandler(&fakeSender{}, test.disableLocalhostProtection))
+			defer server.Close()
+
+			requestBody := []byte(`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}`)
+			request, err := http.NewRequest(http.MethodPost, server.URL, bytes.NewReader(requestBody))
+			if err != nil {
+				t.Fatal(err)
+			}
+			request.Header.Set("Content-Type", "application/json")
+			request.Header.Set("Accept", "application/json, text/event-stream")
+			request.Host = "telegram-file-mcp.vercel.app"
+
+			response, err := server.Client().Do(request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			response.Body.Close()
+			if response.StatusCode != test.wantStatus {
+				t.Fatalf("status=%d, want %d", response.StatusCode, test.wantStatus)
+			}
+		})
 	}
 }
